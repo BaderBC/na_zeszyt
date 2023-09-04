@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model sheet {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  products       Int[]
+  productOnSheet productOnSheet[]
+}
+
+model productOnSheet {
+  id              Int           @id @default(autoincrement())
+  added_date      DateTime      @default(dbgenerated("NOW()"))
+  is_active       Boolean       @default(true)
+  type_of_measure TypeOfMeasure @default(unit)
+  count           Float         @default(1.0)
+
+  product   product @relation(fields: [productId], references: [id], onDelete: NoAction)
+  productId Int
+
+  sheet   sheet @relation(fields: [sheetId], references: [id], onDelete: NoAction)
+  sheetId Int
+}
+
+enum TypeOfMeasure {
+  unit
+  kg
+}
+
+model product {
+  id   Int     @id @default(autoincrement())
+  code String? @unique
+  name String?
+
+  productOnSheet productOnSheet[]
+}
