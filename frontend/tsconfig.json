@@ -1,17 +1,21 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
-	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"sourceMap": true,
-		"strict": true
-	}
-	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
-	//
-	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-	// from the referenced tsconfig.json - TypeScript does not merge them in
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmitHelpers": true,
+    "noEmitOnError": true,
+    "jsx": "react",
+    "lib": ["ESNext", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"],
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["./src/**/*.tsx?"],
+  "files": ["./references.d.ts"],
+  "exclude": ["node_modules", "platforms"]
 }
