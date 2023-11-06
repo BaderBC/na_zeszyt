@@ -1,0 +1,18 @@
+services:
+  server:
+    network_mode: host
+    build:
+      dockerfile: "./Dockerfile"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/na_zeszyt?schema=public"
+    volumes:
+      - ./src:/app/src
+  
+  database:
+    network_mode: host
+    build:
+      dockerfile: "./Dockerfile_postgres"
+      args:
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_DB: "na_zeszyt"

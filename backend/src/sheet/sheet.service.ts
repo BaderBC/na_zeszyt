@@ -23,14 +23,19 @@ export class SheetService {
   }
 
   async findAll() {
-    return await this.prisma.sheet.findMany();
+    return await this.prisma.sheet.findMany({});
   }
 
-  async findOne(name: string) {
+  async findOneWithDetails(name: string) {
     let sheet;
     try {
       sheet = await this.prisma.sheet.findUniqueOrThrow({
         where: { name: name },
+        include: {
+          productOnSheet: {
+            include: { product: true },
+          },
+        },
       });
     } catch (e) {
       if (!(e instanceof Prisma.PrismaClientKnownRequestError)) return;

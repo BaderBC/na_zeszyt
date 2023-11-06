@@ -22,7 +22,7 @@ export class SheetController {
   @Get()
   findOne(@Query('name') name: string) {
     if (name) {
-      return this.sheetService.findOne(name);
+      return this.sheetService.findOneWithDetails(name);
     }
     return this.sheetService.findAll();
   }
