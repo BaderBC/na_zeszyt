@@ -38,6 +38,15 @@ export class ProductsOnSheetService {
     return await this.prisma.productOnSheet.findMany();
   }
 
+  async increaseCount(id: number, count: number) {
+    await this.prisma.productOnSheet.update({
+      where: { id },
+      data: {
+        count: { increment: count },
+      },
+    });
+  }
+
   async update(id: number, dto: UpdateProductOnSheetDto) {
     await this.prisma.productOnSheet.update({
       where: { id },

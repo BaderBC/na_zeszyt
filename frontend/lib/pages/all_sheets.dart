@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:na_zeszyt/api.dart';
@@ -19,7 +20,10 @@ class _AllSheetsPageState extends State<AllSheetsPage> {
       future: SheetApi.fetchAll(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (!snapshot.hasData) {
-          return const SizedBox.shrink(); // TODO: make e.g. loader
+          return const Text("Loading..."); // TODO: make e.g. loader
+        }
+        if (snapshot.hasError) {
+          throw snapshot.error!;
         }
 
         sheets = snapshot.data;
@@ -30,21 +34,23 @@ class _AllSheetsPageState extends State<AllSheetsPage> {
 
   Widget _build() {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            const Text(
-              "Kartki:",
-              style: TextStyle(
-                fontSize: 50,
-                fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: [
+              const Text(
+                "Kartki:",
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            addSheet(),
-            const SizedBox(height: 15),
-            Expanded(child: sheetsColumn()),
-          ],
+              addSheet(),
+              const SizedBox(height: 15),
+              Expanded(child: sheetsColumn()),
+            ],
+          ),
         ),
       ),
     );
@@ -98,71 +104,57 @@ class _AllSheetsPageState extends State<AllSheetsPage> {
   }
 
   Widget sheetsColumn() {
-    return ListView.builder(
+    return ReorderableListView(
+      buildDefaultDragHandles: false,
       scrollDirection: Axis.vertical,
-      itemCount: sheets.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: sheetWidget(sheets[index]),
-        );
-      },
+      children: [
+        for(int i = 0; i < sheets.length; i++)
+          sheetWidget(sheets[i], index: i),
+      ],
+      onReorder: (int oldIndex, int newIndex) {},
     );
   }
 
-  Widget sheetWidget(SheetApi sheetData) {
-    final productsLen = sheetData.products.length;
+  Widget sheetWidget(SheetApi sheetData, {required int index}) {
+    final productsLen = sheetData.productsCount;
 
-    final finalSheetWidget = Container(
-      decoration: BoxDecoration(
-        color: const Color(0xffd5d5d5),
-        borderRadius: BorderRadius.circular(7),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-      child: Row(
-        children: [
-          Text(
-            sheetData.name,
-            style: const TextStyle(
-              color: primaryTextColor,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              const Text(
-                "Ile do spisania: ",
-                style: TextStyle(
-                  color: primaryTextColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                productsLen.toString(),
-                style: TextStyle(
-                  color: productsLen == 0
-                      ? primaryTextColor
-                      : const Color(0xffc91a1a),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+    return Card(
+      key: Key('$index'),
+      child: ListTile(
         onTap: () {
           context.go('/sheet/${sheetData.name}');
         },
-        child: finalSheetWidget,
+        title: Text(
+          sheetData.name,
+          style: const TextStyle(
+            color: primaryTextColor,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Row(
+          children: [
+            const Text(
+              "Ile do spisania: ",
+              style: TextStyle(
+                color: primaryTextColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              productsLen.toString(),
+              style: TextStyle(
+                color: productsLen == 0
+                    ? primaryTextColor
+                    : const Color(0xffc91a1a),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        trailing: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
       ),
     );
   }

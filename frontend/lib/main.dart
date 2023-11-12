@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:na_zeszyt/pages/allSheets.dart';
+import 'package:na_zeszyt/pages/all_sheets.dart';
 import 'package:na_zeszyt/pages/sheet.dart';
 
 void main() {
@@ -28,6 +28,7 @@ class RouterWidget extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        colorScheme: const ColorScheme.light(),
       ),
     );
   }
@@ -38,13 +39,34 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const AllSheetsPage(),
+      pageBuilder: (context, state) => defaultTransitionPage(
+        context,
+        state,
+        const AllSheetsPage(),
+      ),
     ),
     GoRoute(
       path: '/sheet/:sheetName',
-      builder: (context, state) => SheetPage(
-        sheetName: state.pathParameters['sheetName']!,
+      pageBuilder: (context, state) => defaultTransitionPage(
+        context,
+        state,
+        SheetPage(sheetName: state.pathParameters['sheetName']!),
       ),
     ),
   ],
 );
+
+Page defaultTransitionPage(
+    BuildContext context, GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 300),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurveTween(curve: Curves.easeIn).animate(animation),
+        child: child,
+      );
+    },
+  );
+}

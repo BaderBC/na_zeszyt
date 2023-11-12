@@ -20,11 +20,16 @@ export class SheetController {
   }
 
   @Get()
-  findOne(@Query('name') name: string) {
-    if (name) {
-      return this.sheetService.findOneWithDetails(name);
+  findOne(
+    @Query('name') name: string,
+    @Query('includeProducts') _includeProducts: string,
+  ) {
+    const includeProducts = _includeProducts?.toLowerCase() === 'true';
+
+    if (name && name !== '') {
+      return this.sheetService.findOne(name, includeProducts);
     }
-    return this.sheetService.findAll();
+    return this.sheetService.findAll(includeProducts);
   }
 
   @Patch()

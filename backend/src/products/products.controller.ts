@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Query,
+  HttpException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductDto } from './dto/product.dto';
@@ -17,6 +18,28 @@ export class ProductsController {
   @Post()
   create(@Body() dto: ProductDto) {
     return this.productsService.create(dto);
+  }
+
+  @Get()
+  async findOne(@Query('barcode') barcode: string) {
+    let product = null;
+
+    try {
+      product = await this.productsService.findOne(barcode);
+    } catch (e) {
+      if (e.code != 'P2025') throw e;
+
+      product = await this.productsService
+        .createFromEAN(barcode)
+        .catch((err) => {
+          throw new HttpException(
+            `Unrecognized barcode "${barcode}"\n${err}`,
+            422,
+          );
+        });
+    }
+
+    return product;
   }
 
   @Get()

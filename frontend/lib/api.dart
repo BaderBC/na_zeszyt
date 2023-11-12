@@ -1,23 +1,34 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const urlHostPrefix = "http://localhost:3000";
+//const urlHostPrefix = "http://127.0.0.1:3000";
+const urlHostPrefix = "http://10.0.0.70:3000";
 
 extension IsOk on http.Response {
   bool get ok {
-    return (statusCode ~/ 100) == 2;
+    int firstDigit = (statusCode ~/ 100);
+    return firstDigit == 2 || firstDigit == 3;
   }
 }
 
 class SheetApi {
-  SheetApi({required this.id, required this.name, required this.products});
+  SheetApi({
+    required this.id,
+    required this.name,
+    required this.products,
+    required this.productsCount,
+  });
 
   int id;
   String name;
   List<ProductOnSheetApi> products;
+  int productsCount;
 
-  static Future<List<SheetApi>> fetchAll() async {
-    var res = await http.get(Uri.parse("$urlHostPrefix/sheet"));
+  static Future<List<SheetApi>> fetchAll(
+      {bool? includeProducts = false}) async {
+    var res = await http.get(
+        Uri.parse("$urlHostPrefix/sheet?includeProducts=$includeProducts"));
+    print("test ${res.statusCode}");
     if (!res.ok) {
       throw "Failed to fetch sheets";
     }
@@ -32,8 +43,12 @@ class SheetApi {
     return allSheets;
   }
 
-  static Future<SheetApi> fetchOne(String name) async {
-    var res = await http.get(Uri.parse("$urlHostPrefix/sheet?name=$name"));
+  static Future<SheetApi> fetchOne(
+    String name, {
+    bool? includeProducts = true,
+  }) async {
+    var res = await http.get(Uri.parse(
+        "$urlHostPrefix/sheet?includeProducts=$includeProducts&name=$name"));
     if (!res.ok) {
       throw "Failed to fetch sheet $name";
     }
@@ -52,7 +67,9 @@ class SheetApi {
     return SheetApi(
       id: json["id"],
       name: json["name"],
-      products: ProductOnSheetApi.listFromDynamic(json["productOnSheet"]),
+      products:
+          ProductOnSheetApi.listFromDynamic(json["productsOnSheet"] ?? []),
+      productsCount: json["productsCount"],
     );
   }
 }
@@ -77,6 +94,18 @@ class ProductOnSheetApi {
   ProductApi product;
   int productId;
   int sheetId;
+
+  Future<bool> changeActivity(bool isActive) async {
+    var uri = Uri.parse('$urlHostPrefix/products-on-sheet?id=$id');
+    var res = await http.patch(uri,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "is_active": isActive,
+        }));
+
+    if (res.ok) isActive = isActive;
+    return res.ok;
+  }
 
   static List<ProductOnSheetApi> listFromDynamic(dynamic json) {
     List<ProductOnSheetApi> productsOnSheet = [];
@@ -111,6 +140,16 @@ class ProductApi {
   int id;
   String code;
   String name;
+
+  static Future<ProductApi?> fetchProduct(String barcode) async {
+    var uri = Uri.parse('$urlHostPrefix/products?barcode=$barcode');
+    var res = await http.get(uri);
+    if (res.statusCode == 422) {
+      return null;
+    }
+
+    return ProductApi.fromDynamic(jsonDecode(res.body));
+  }
 
   static ProductApi fromDynamic(dynamic json) {
     return ProductApi(

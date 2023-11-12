@@ -4,10 +4,10 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
-  UsePipes, Query
-} from "@nestjs/common";
+  UsePipes,
+  Query,
+} from '@nestjs/common';
 import { ProductsOnSheetService } from './products-on-sheet.service';
 import { ProductOnSheetDto } from './dto/product-on-sheet.dto';
 import { UpdateProductOnSheetDto } from './dto/update-product-on-sheet.dto';
@@ -35,6 +35,11 @@ export class ProductsOnSheetController {
     @Body() updateProductOnSheetDto: UpdateProductOnSheetDto,
   ) {
     return this.productOnSheetService.update(+id, updateProductOnSheetDto);
+  }
+
+  @Post('increase')
+  increaseCount(@Query('id') id: string, @Body('count') count: number) {
+    return this.productOnSheetService.increaseCount(+id, count);
   }
 
   @Delete()

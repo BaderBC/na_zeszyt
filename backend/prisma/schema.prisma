@@ -11,10 +11,9 @@ datasource db {
 }
 
 model sheet {
-  id             Int              @id @default(autoincrement())
-  name           String           @unique
-  products       Int[] // TODO: remove it (it's probably useless)
-  productOnSheet productOnSheet[]
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  productsOnSheet productOnSheet[]
 }
 
 model productOnSheet {
@@ -37,9 +36,10 @@ enum TypeOfMeasure {
 }
 
 model product {
-  id   Int     @id @default(autoincrement())
-  code String? @unique
-  name String?
+  id    Int     @id @default(autoincrement())
+  code  String  @unique
+  name  String?
+  image Bytes?
 
-  productOnSheet productOnSheet[]
+  productsOnSheet productOnSheet[]
 }

@@ -1,4 +1,4 @@
 export class ProductDto {
-  code?: string;
+  code: string;
   name?: string;
 }
