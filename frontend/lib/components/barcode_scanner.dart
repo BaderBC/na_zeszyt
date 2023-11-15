@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:na_zeszyt/api.dart';
+import 'package:na_zeszyt/components/primary_loader.dart';
 import 'package:na_zeszyt/components/scanned_product_menu.dart';
 import 'package:na_zeszyt/shared/themeData.dart';
 
 class BarcodeScanner extends StatelessWidget {
-  const BarcodeScanner({super.key});
+  const BarcodeScanner({
+    super.key,
+    required this.parentContext,
+    required this.sheetData,
+  });
 
-  static void popup(BuildContext context) {
+  final SheetApi sheetData;
+  final BuildContext parentContext;
+
+  static void popup(BuildContext context, SheetApi sheetData) {
     showDialog(
       context: context,
-      builder: (context) => const BarcodeScanner(),
+      builder: (_) => BarcodeScanner(parentContext: context, sheetData: sheetData),
     );
   }
 
@@ -21,18 +29,7 @@ class BarcodeScanner extends StatelessWidget {
     return MobileScanner(
       controller: controller,
       onDetect: (capture) async {
-        String barcode = capture.barcodes.first.rawValue!;
-        ProductApi? productData = await ProductApi.fetchProduct(barcode);
-
-        Navigator.pop(context);
-        if (productData == null) {
-
-        } else {
-          ScannedProductMenu.popup(
-            context,
-            productData: productData,
-          );
-        }
+        await onDetect(context, capture.barcodes.first.rawValue!);
       },
       errorBuilder: (context, error, child) {
         Navigator.pop(context);
@@ -96,5 +93,32 @@ class BarcodeScanner extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> onDetect(BuildContext context, String barcode) async {
+    Navigator.pop(context);
+
+    var loader = PrimaryLoader(context: context);
+    loader.popup();
+
+    ProductApi? productData;
+    try {
+      productData = await ProductApi.fetchProduct(barcode);
+    } catch (_) {
+      loader.hidePopup();
+      return;
+      // TODO: error message
+    }
+    loader.hidePopup();
+
+    if (productData == null) {
+      // TODO: handle this one
+    } else {
+      ScannedProductMenu.popup(
+        parentContext,
+        productData: productData,
+        sheetData: sheetData,
+      );
+    }
   }
 }

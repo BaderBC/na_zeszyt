@@ -43,6 +43,7 @@ dependencies:
   flutter_slidable: ^3.0.1
   flutter_barcode_scanner: ^2.0.0
   mobile_scanner: ^3.5.2
+  loading_animation_widget: ^1.2.0+4
 
 dev_dependencies:
   flutter_test:

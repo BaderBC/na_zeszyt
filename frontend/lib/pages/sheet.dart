@@ -68,7 +68,7 @@ class _SheetPageState extends State<SheetPage> {
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: ElevatedButton(
         onPressed: () {
-          BarcodeScanner.popup(context);
+          BarcodeScanner.popup(context, sheetData);
         },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -104,7 +104,7 @@ class _SheetPageState extends State<SheetPage> {
   Widget productWidget(
       BuildContext context, ProductOnSheetApi productData, int index) {
     var (count, unitName) =
-        readableCountAndUnit(productData.typeOfMeasure, productData.count);
+        readableCountAndUnit(productData.product.typeOfMeasure, productData.count);
 
     var productCard = Card(
       child: ListTile(
@@ -205,7 +205,7 @@ class _SheetPageState extends State<SheetPage> {
 
   Widget countSettingsCard(ProductOnSheetApi productOnSheetData) {
     var (productCount, measurementUnit) = readableCountAndUnit(
-        productOnSheetData.typeOfMeasure, productOnSheetData.count);
+        productOnSheetData.product.typeOfMeasure, productOnSheetData.count);
 
     var countController = TextEditingController();
     countController.text = "$productCount $measurementUnit";

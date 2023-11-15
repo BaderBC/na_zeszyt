@@ -17,11 +17,16 @@ import { ValidateCreateDtoPipe } from './pipes/validateCreateDto.pipe';
 export class ProductsOnSheetController {
   constructor(private readonly productOnSheetService: ProductsOnSheetService) {}
 
-  @Post()
+  @Post('/create')
   @UsePipes(new ValidateCreateDtoPipe())
   create(@Body() createProductOnSheetDto: ProductOnSheetDto) {
     console.log(createProductOnSheetDto);
     return this.productOnSheetService.create(createProductOnSheetDto);
+  }
+
+  @Post('/createOrIncreaseCount')
+  createOrIncreaseCount(@Body() dto: ProductOnSheetDto) {
+    return this.productOnSheetService.createOrIncreaseCount(dto);
   }
 
   @Get()
@@ -38,8 +43,12 @@ export class ProductsOnSheetController {
   }
 
   @Post('increase')
-  increaseCount(@Query('id') id: string, @Body('count') count: number) {
-    return this.productOnSheetService.increaseCount(+id, count);
+  increaseCount(
+    @Query('id') id?: string,
+    @Query('code') code?: string,
+    @Body('count') count?: number,
+  ) {
+    return this.productOnSheetService.increaseCount(code, +id || null, count);
   }
 
   @Delete()

@@ -17,11 +17,10 @@ model sheet {
 }
 
 model productOnSheet {
-  id              Int           @id @default(autoincrement())
-  added_date      DateTime      @default(dbgenerated("NOW()"))
-  is_active       Boolean       @default(true)
-  type_of_measure TypeOfMeasure @default(unit)
-  count           Float         @default(1.0)
+  id         Int      @id @default(autoincrement())
+  added_date DateTime @default(dbgenerated("NOW()"))
+  is_active  Boolean  @default(true)
+  count      Float    @default(1.0)
 
   product   product @relation(fields: [productId], references: [id], onDelete: NoAction)
   productId Int
@@ -30,16 +29,17 @@ model productOnSheet {
   sheetId Int
 }
 
+model product {
+  id              Int           @id @default(autoincrement())
+  code            String        @unique
+  type_of_measure TypeOfMeasure @default(unit)
+  name            String
+  image           Bytes?
+
+  productsOnSheet productOnSheet[]
+}
+
 enum TypeOfMeasure {
   unit
   kg
-}
-
-model product {
-  id    Int     @id @default(autoincrement())
-  code  String  @unique
-  name  String?
-  image Bytes?
-
-  productsOnSheet productOnSheet[]
 }

@@ -22,9 +22,12 @@ export class SheetService {
     }
   }
 
-  async findAll(includeProducts?: boolean) {
+  async findAll(includeProducts?: boolean, includePhoto?: boolean) {
     const sheets: any[] = await this.prisma.sheet.findMany({
-      include: this.getProductInclude(includeProducts || false),
+      include: this.getProductInclude(
+        includeProducts || false,
+        includePhoto || false,
+      ),
     });
     sheets.map((e) => {
       e.productsCount = e._count.productsOnSheet;
@@ -34,12 +37,19 @@ export class SheetService {
     return sheets;
   }
 
-  async findOne(name: string, includeProducts?: boolean) {
+  async findOne(
+    name: string,
+    includeProducts?: boolean,
+    includePhoto?: boolean,
+  ) {
     let sheet;
     try {
       sheet = await this.prisma.sheet.findUniqueOrThrow({
         where: { name: name },
-        include: this.getProductInclude(includeProducts || false),
+        include: this.getProductInclude(
+          includeProducts || false,
+          includePhoto || false,
+        ),
       });
     } catch (e) {
       if (!(e instanceof Prisma.PrismaClientKnownRequestError)) return;
@@ -72,7 +82,10 @@ export class SheetService {
     });
   }
 
-  private getProductInclude(includeProducts: boolean): Prisma.sheetInclude {
+  private getProductInclude(
+    includeProducts: boolean,
+    includePhoto: boolean,
+  ): Prisma.sheetInclude {
     const include: Prisma.sheetInclude = {
       _count: {
         select: { productsOnSheet: true },
@@ -82,8 +95,18 @@ export class SheetService {
     if (includeProducts) {
       Object.assign(include, {
         productsOnSheet: {
-          include: { product: true },
           orderBy: [{ is_active: 'desc' }, { added_date: 'desc' }],
+          include: {
+            product: {
+              select: {
+                id: true,
+                code: true,
+                type_of_measure: true,
+                name: true,
+                image: includePhoto,
+              },
+            },
+          },
         },
       });
     }

@@ -1,6 +1,5 @@
 import {
   IsBoolean,
-  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -9,10 +8,6 @@ import {
 } from 'class-validator';
 
 export class ProductOnSheetDto {
-  @IsNotEmpty()
-  @IsEnum(['kg', 'unit'])
-  type_of_measure: 'kg' | 'unit';
-
   @IsOptional()
   @IsNumber()
   count?: number;
@@ -26,9 +21,9 @@ export class ProductOnSheetDto {
   @IsInt()
   productId?: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  product_code?: string;
+  product_code: string;
 
   @IsNotEmpty()
   @IsNumber()

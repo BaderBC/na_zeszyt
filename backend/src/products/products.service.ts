@@ -9,7 +9,9 @@ export class ProductsService {
 
   async create(dto: ProductDto) {
     try {
-      await this.prisma.product.create({ data: dto });
+      await this.prisma.product.create({
+        data: dto,
+      });
     } catch (e) {
       if (!(e instanceof Prisma.PrismaClientKnownRequestError)) throw e;
       if (e.code === 'P2002') {
@@ -57,8 +59,8 @@ export class ProductsService {
     });
   }
 
-  async findAll() {
-    return await this.prisma.product.findMany();
+  findAll(take = 0, skip = 10) {
+    return this.prisma.product.findMany({ take, skip });
   }
 
   async update(id: number, dto: ProductDto) {

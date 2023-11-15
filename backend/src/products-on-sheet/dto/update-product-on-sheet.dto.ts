@@ -1,10 +1,6 @@
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsInt, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateProductOnSheetDto {
-  @IsOptional()
-  @IsEnum(['kg', 'unit'])
-  type_of_measure: 'kg' | 'unit';
-
   @IsOptional()
   @IsNumber()
   count?: number;

@@ -23,7 +23,6 @@ export class ProductsOnSheetService {
 
     const productOnSheet = await this.prisma.productOnSheet.create({
       data: {
-        type_of_measure: dto.type_of_measure,
         count: dto.count,
         sheetId: dto.sheetId,
         productId: dto.productId || productId,
@@ -34,17 +33,40 @@ export class ProductsOnSheetService {
     return { productOnSheetId: productOnSheet.id };
   }
 
-  async findAll() {
-    return await this.prisma.productOnSheet.findMany();
-  }
+  async increaseCount(code?: string, id?: number, count?: number) {
+    let where: any;
 
-  async increaseCount(id: number, count: number) {
-    await this.prisma.productOnSheet.update({
-      where: { id },
+    if (id) {
+      where = { id };
+    } else {
+      where = { product: { code }, is_active: true };
+    }
+
+    const dbRes = await this.prisma.productOnSheet.updateMany({
+      where,
       data: {
-        count: { increment: count },
+        count: { increment: count || 1 },
       },
     });
+    return dbRes ? dbRes[0] : null;
+  }
+
+  async createOrIncreaseCount(dto: ProductOnSheetDto) {
+    const activeProducts = await this.prisma.productOnSheet.findMany({
+      where: {
+        is_active: true,
+        sheetId: dto.sheetId,
+        product: { code: dto.product_code },
+      },
+    });
+    if (activeProducts.length > 0) {
+      return await this.increaseCount(dto.product_code, null, dto.count);
+    }
+    return await this.create(dto);
+  }
+
+  async findAll() {
+    return await this.prisma.productOnSheet.findMany();
   }
 
   async update(id: number, dto: UpdateProductOnSheetDto) {

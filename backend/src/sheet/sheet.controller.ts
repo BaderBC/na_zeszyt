@@ -23,13 +23,19 @@ export class SheetController {
   findOne(
     @Query('name') name: string,
     @Query('includeProducts') _includeProducts: string,
+    @Query('includeProductImage') _includeProductImage: string,
   ) {
     const includeProducts = _includeProducts?.toLowerCase() === 'true';
+    const includeProductImage = _includeProductImage?.toLowerCase() === 'true';
 
     if (name && name !== '') {
-      return this.sheetService.findOne(name, includeProducts);
+      return this.sheetService.findOne(
+        name,
+        includeProducts,
+        includeProductImage,
+      );
     }
-    return this.sheetService.findAll(includeProducts);
+    return this.sheetService.findAll(includeProducts, includeProductImage);
   }
 
   @Patch()

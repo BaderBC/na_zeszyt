@@ -21,7 +21,12 @@ export class ProductsController {
   }
 
   @Get()
-  async findOne(@Query('barcode') barcode: string) {
+  async findOne(
+    @Query('barcode') barcode?: string,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    if (!barcode) return this.productsService.findAll(+take || 10, +skip || 0);
     let product = null;
 
     try {
@@ -40,11 +45,6 @@ export class ProductsController {
     }
 
     return product;
-  }
-
-  @Get()
-  findAll() {
-    return this.productsService.findAll();
   }
 
   @Patch()
